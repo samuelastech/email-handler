@@ -10,7 +10,7 @@ dotenv.config();
  * Routes
  */
 import { listEmails } from './routes/email.js';
-import { listCredentials } from './routes/credential.js';
+import { listCredentials, createCredentials } from './routes/credential.js';
 
 const router = {
   default: (_, response) => {
@@ -19,6 +19,7 @@ const router = {
   },
   '/email:GET': listEmails,
   '/credential:GET': listCredentials,
+  '/credential:POST': createCredentials,
 };
 
 const handleRequests = async (request, response) => {
