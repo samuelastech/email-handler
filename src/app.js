@@ -9,11 +9,14 @@ dotenv.config();
 /**
  * Routes
  */
+import { listEmails } from './routes/email.js';
+
 const router = {
   default: (_, response) => {
     response.write('Email Handler');
     response.end();
   },
+  '/email:GET': listEmails,
 };
 
 const handleRequests = async (request, response) => {
