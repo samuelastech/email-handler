@@ -4,32 +4,27 @@ import { Readable, Writable } from 'node:stream';
 import { WritableStream, TransformStream } from 'node:stream/web';
 
 class Queue {
-  start = async () => {
+  start = async (response) => {
     let items = 0;
 
-    const readable = new Readable({
+    const readable = new Readable.toWeb(new Readable({
       async read() {
         for await (const email of Email.find({ status: 'pending' })) {
           this.push(JSON.stringify(email));
           items++;
         }
         this.push(null);
-      }
-    });
-
-    readable.pipe(new Writable({
-      write(chunk, _, callback) {
-        console.log(JSON.parse(chunk));
-        callback();
       },
-      final() {
+    }));
+
+    readable.pipeTo(new WritableStream({
+      write(chunk) {
+        console.log(JSON.parse(Buffer.from(chunk)));
+      },
+      close() {
         console.log('Emails processed: ' + items);
-      }
+      },
     }))
-  }
-
-  emails = async function* () {
-
   }
 }
 
