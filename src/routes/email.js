@@ -1,4 +1,5 @@
 import Email from '../controllers/Email.js';
+import Transporter from '../controllers/Transporter.js';
 import { parseCookies } from '../lib/cookieParser.js';
 import { whoIs } from '../lib/token.js';
 
@@ -34,7 +35,9 @@ export const createEmail = async (request, response) => {
   });
 
   request.on('end', async () => {
-    await Email.create(body);
+    const email = await Email.create(body);
+    await Transporter.bind(credentialId, email._id);
+
     response.writeHead(201);
     response.end(JSON.stringify({
       status: true,

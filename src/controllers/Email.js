@@ -13,7 +13,7 @@ class EmailController {
   create = async (email) => {
     try {
       const result = this.#validate(email);
-      await Email.create(result);
+      return await Email.create(result);
     } catch (error) {
       throw error;
     }

@@ -23,6 +23,17 @@ class TransporterController {
     }
   }
 
+  bind = async (credentialId, emailId) => {
+    try {
+      await Credential.findByIdAndUpdate(
+        { _id: credentialId },
+        { $addToSet: { email: emailId } }
+      );
+    } catch (error) {
+      throw error;
+    }
+  }
+
   #validate = (credential) => {
     const credentialBody = z.object({
       host: z.string(),
