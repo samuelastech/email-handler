@@ -65,5 +65,11 @@ const CredentialSchema = new mongoose.Schema({
   }],
 });
 
+EmailSchema.pre('save', function (next) {
+  const self = this;
+  self.status = 'pending';
+  next();
+});
+
 export const Email = mongoose.model(emailCollection, EmailSchema);
 export const Credential = mongoose.model(credentialCollection, CredentialSchema);
