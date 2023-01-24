@@ -1,4 +1,6 @@
 import Transport from '../controllers/Transporter.js';
+import { createAccess } from '../lib/token.js';
+import { parseCookies } from '../lib/cookieParser.js';
 
 export const listCredentials = async (request, response) => {
   const credentials = await Transport.list();
@@ -16,13 +18,16 @@ export const createCredentials = (request, response) => {
   });
 
   request.on('end', async () => {
-    await Transport.create(body);
+    const mailer = await Transport.create(body);
+    const accessToken = createAccess(mailer._id);
+
+    response.writeHead(201, {
+      "Set-Cookie": `accessToken=${accessToken}`,
+    });
+
+    response.end(JSON.stringify({
+      status: true,
+      message: 'credential created',
+    }));
   });
-
-  response.writeHead(201);
-
-  response.end(JSON.stringify({
-    status: true,
-    message: 'credential created'
-  }));
 }
