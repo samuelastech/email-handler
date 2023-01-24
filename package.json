@@ -1,0 +1,22 @@
+{
+  "name": "email-handler",
+  "version": "1.0.0",
+  "description": "A service meant to handle email-sending features",
+  "main": "src/bin/server.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/bin/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/samuelastech/email-handler.git"
+  },
+  "author": "Samuel A. Souza <samuel.araujo.souza@outlook.com>",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.0.3",
+    "mongoose": "^6.8.4",
+    "nodemailer": "^6.9.0",
+    "zod": "^3.20.2"
+  }
+}
