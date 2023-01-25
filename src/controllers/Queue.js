@@ -1,6 +1,7 @@
 import { Email } from '../models/models.js';
 import { Readable } from 'node:stream';
 import { WritableStream } from 'node:stream/web';
+import Transporter from './Transporter.js';
 
 class Queue {
   start = async (response) => {
@@ -8,7 +9,12 @@ class Queue {
 
     const readable = new Readable.toWeb(new Readable({
       async read() {
-        for await (const email of Email.find({ status: 'pending' })) {
+        for await (
+          const email of Email
+            .find({ status: 'pending' })
+            .select('-__v')
+            .populate('credential', '-email -_id -__v')
+        ) {
           this.push(JSON.stringify(email));
           items++;
         }
@@ -17,7 +23,10 @@ class Queue {
     }));
 
     readable.pipeTo(new WritableStream({
-      write(chunk) {
+      async write(chunk) {
+        const data = JSON.parse(Buffer.from(chunk));
+        const { credential, ...infos } = data;
+        await Transporter.send(credential, infos);
         response.write(chunk);
       },
       close() {

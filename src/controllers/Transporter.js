@@ -1,4 +1,5 @@
 import { Credential } from '../models/models.js';
+import nodemailer from 'nodemailer';
 import * as z from 'zod';
 
 class TransporterController {
@@ -29,6 +30,21 @@ class TransporterController {
         { _id: credentialId },
         { $addToSet: { email: emailId } }
       );
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  send = async (credential, infos) => {
+    try {
+      const transporter = nodemailer.createTransport(credential);
+      const result = await transporter.sendMail({
+        from: infos.from,
+        subject: infos.subject,
+        to: infos.to,
+        text: infos.text
+      });
+      return result;
     } catch (error) {
       throw error;
     }
