@@ -1,7 +1,6 @@
 import { Email } from '../models/models.js';
-import { setTimeout } from 'node:timers/promises';
-import { Readable, Writable } from 'node:stream';
-import { WritableStream, TransformStream } from 'node:stream/web';
+import { Readable } from 'node:stream';
+import { WritableStream } from 'node:stream/web';
 
 class Queue {
   start = async (response) => {
@@ -19,10 +18,14 @@ class Queue {
 
     readable.pipeTo(new WritableStream({
       write(chunk) {
-        console.log(JSON.parse(Buffer.from(chunk)));
+        response.write(chunk);
       },
       close() {
         console.log('Emails processed: ' + items);
+        response.end(JSON.stringify({
+          status: true,
+          message: `Emails processed: ${items}`
+        }));
       },
     }))
   }
