@@ -15,6 +15,8 @@ class Queue {
             .select('-__v')
             .populate('credential', '-email -_id -__v')
         ) {
+          email.status = 'sent';
+          email.save();
           this.push(JSON.stringify(email));
           items++;
         }
