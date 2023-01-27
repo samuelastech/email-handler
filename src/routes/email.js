@@ -1,7 +1,4 @@
 import Email from '../controllers/Email.js';
-import Transporter from '../controllers/Transporter.js';
-import { parseCookies } from '../lib/cookieParser.js';
-import { whoIs } from '../lib/token.js';
 
 export const listEmails = async (request, response) => {
   const emails = await Email.list();
@@ -12,31 +9,23 @@ export const listEmails = async (request, response) => {
   }));
 };
 
+export const deleteAllEmails = async (request, response) => {
+  await Email.clean();
+
+  response.end(JSON.stringify({
+    status: false,
+  }));
+};
+
 export const createEmail = async (request, response) => {
-  const { accessToken } = parseCookies(request);
-
-  if (!accessToken) {
-    response.writeHead(400);
-    response.end(JSON.stringify({
-      status: false,
-      message: 'token not found',
-    }));
-    return;
-  }
-
-  const { credentialId } = whoIs(accessToken);
   let body = {}
 
   request.on('data', (chunk) => {
-    body = {
-      credential: credentialId,
-      ...JSON.parse(chunk),
-    };
+    body = { ...JSON.parse(chunk), };
   });
 
   request.on('end', async () => {
-    const email = await Email.create(body);
-    await Transporter.bind(credentialId, email._id);
+    await Email.create(body);
 
     response.writeHead(201);
     response.end(JSON.stringify({

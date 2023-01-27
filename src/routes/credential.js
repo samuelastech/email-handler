@@ -1,6 +1,4 @@
 import Transport from '../controllers/Transporter.js';
-import { createAccess } from '../lib/token.js';
-import { parseCookies } from '../lib/cookieParser.js';
 
 export const listCredentials = async (request, response) => {
   const credentials = await Transport.list();
@@ -10,24 +8,39 @@ export const listCredentials = async (request, response) => {
   }));
 };
 
-export const createCredentials = (request, response) => {
+export const deleteAllCredentials = async (request, response) => {
+  const deleted = await Transport.clean();
+  response.end(JSON.stringify({
+    status: true,
+    deleted
+  }));
+}
+
+export const createCredentials = async (request, response) => {
   let body = {};
+
+  if ((await Transport.list()).length > 0) {
+    response.writeHead(401);
+
+    response.end(JSON.stringify({
+      status: false,
+      message: "it's possible to have only one credential",
+    }));
+
+    return;
+  }
 
   request.on('data', (chunk) => {
     body = { ...JSON.parse(chunk) }; // just one chunk
   });
 
   request.on('end', async () => {
-    const mailer = await Transport.create(body);
-    const accessToken = createAccess(mailer._id);
-
-    response.writeHead(201, {
-      "Set-Cookie": `accessToken=${accessToken}`,
-    });
+    const credential = await Transport.create(body);
 
     response.end(JSON.stringify({
       status: true,
       message: 'credential created',
+      credential
     }));
   });
 }

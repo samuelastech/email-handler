@@ -9,8 +9,8 @@ dotenv.config();
 /**
  * Routes
  */
-import { listEmails, createEmail } from './routes/email.js';
-import { listCredentials, createCredentials } from './routes/credential.js';
+import { listEmails, createEmail, deleteAllEmails } from './routes/email.js';
+import { listCredentials, createCredentials, deleteAllCredentials } from './routes/credential.js';
 import { queueStart } from './routes/queue.js';
 
 const router = {
@@ -20,8 +20,12 @@ const router = {
   },
   '/email:GET': listEmails,
   '/email:POST': createEmail,
+  '/email/clean:DELETE': deleteAllEmails,
+
   '/credential:GET': listCredentials,
   '/credential:POST': createCredentials,
+  '/credential/clean:DELETE': deleteAllCredentials,
+
   '/queue/start:GET': queueStart,
 };
 

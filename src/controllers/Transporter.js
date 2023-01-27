@@ -14,30 +14,26 @@ class TransporterController {
   create = async (credential) => {
     try {
       const result = this.#validate(credential);
-      return await Credential.findOneAndUpdate(
-        { auth: { user: result.user }, host: result.host },
-        { result },
-        { upsert: true }
-      );
+      return await Credential.create(result);
     } catch (error) {
       throw error;
     }
   }
 
-  bind = async (credentialId, emailId) => {
+  send = async (infos) => {
     try {
-      await Credential.findByIdAndUpdate(
-        { _id: credentialId },
-        { $addToSet: { email: emailId } }
-      );
-    } catch (error) {
-      throw error;
-    }
-  }
+      const credential = (await Credential.find().select('-_id -__v'))[0];
+      const transporterOptions = {
+        host: credential.host,
+        port: credential.port,
+        secure: credential.secure,
+        auth: {
+          user: credential.auth.user,
+          pass: credential.auth.pass
+        }
+      }
 
-  send = async (credential, infos) => {
-    try {
-      const transporter = nodemailer.createTransport(credential);
+      const transporter = nodemailer.createTransport(transporterOptions);
       const result = await transporter.sendMail({
         from: infos.from,
         subject: infos.subject,
@@ -45,6 +41,22 @@ class TransporterController {
         text: infos.text
       });
       return result;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  me = async () => {
+    try {
+      return (await Credential.find())[0];
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  clean = async () => {
+    try {
+      await Credential.deleteMany();
     } catch (error) {
       throw error;
     }

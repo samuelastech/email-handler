@@ -13,10 +13,9 @@ class Queue {
           const email of Email
             .find({ status: 'pending' })
             .select('-__v')
-            .populate('credential', '-email -_id -__v')
         ) {
-          email.status = 'sent';
-          email.save();
+          email.sentAt = new Date();
+          await email.save();
           this.push(JSON.stringify(email));
           items++;
         }
@@ -26,9 +25,13 @@ class Queue {
 
     readable.pipeTo(new WritableStream({
       async write(chunk) {
-        const data = JSON.parse(Buffer.from(chunk));
-        const { credential, ...infos } = data;
-        await Transporter.send(credential, infos);
+        let infos = JSON.parse(Buffer.from(chunk));
+        try {
+          infos.from = await Transporter.me().from;
+          await Transporter.send(infos);
+        } catch (error) {
+          console.log(error.name)
+        }
         response.write(chunk);
       },
       close() {

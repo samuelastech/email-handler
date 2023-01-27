@@ -5,9 +5,6 @@ const emailCollection = 'email';
 const credentialCollection = 'credential';
 
 const EmailSchema = new mongoose.Schema({
-  from: {
-    type: String
-  },
   to: {
     type: String
   },
@@ -28,12 +25,7 @@ const EmailSchema = new mongoose.Schema({
   },
   sentAt: {
     type: Date,
-  },
-  credential: {
-    type: ObjectId,
-    ref: credentialCollection,
-    required: true,
-  },
+  }
 }, { timestamps: true });
 
 const CredentialSchema = new mongoose.Schema({
@@ -59,15 +51,16 @@ const CredentialSchema = new mongoose.Schema({
       required: true
     }
   },
-  email: [{
-    type: ObjectId,
-    ref: emailCollection
-  }],
 });
 
-EmailSchema.pre('save', function (next) {
+// Model.create() or Model.save()
+EmailSchema.pre('save', { query: false, document: true }, function (next) {
   const self = this;
-  self.status = 'pending';
+  if (!self.status) {
+    self.status = 'pending';
+  } else {
+    self.status = 'sent';
+  }
   next();
 });
 
